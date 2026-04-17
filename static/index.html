@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Interactive AI Search & Pathfinding Visualizer — watch BFS, DFS, Dijkstra and A* explore a grid and find the shortest path in real-time." />
+    <title>AI Search &amp; Pathfinding Visualizer</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <header class="app-header">
+        <h1>🧠 AI Pathfinding Visualizer</h1>
+        <p>Watch search algorithms explore and find the optimal path in real-time</p>
+    </header>
+
+    <div class="main-layout">
+
+        <!-- Sidebar -->
+        <aside class="control-panel">
+
+            <div class="glass-card" id="section-algorithm">
+                <div class="section-title">Algorithm</div>
+                <div class="algo-buttons" id="algo-buttons">
+                    <button class="algo-btn active" data-algo="bfs" id="btn-algo-bfs">
+                        <span class="algo-icon">🌊</span>BFS
+                        <span class="algo-tag">Shortest</span>
+                    </button>
+                    <button class="algo-btn" data-algo="dfs" id="btn-algo-dfs">
+                        <span class="algo-icon">🔍</span>DFS
+                        <span class="algo-tag">Depth</span>
+                    </button>
+                    <button class="algo-btn" data-algo="dijkstra" id="btn-algo-dijkstra">
+                        <span class="algo-icon">⚖️</span>Dijkstra
+                        <span class="algo-tag">Weighted</span>
+                    </button>
+                    <button class="algo-btn" data-algo="astar" id="btn-algo-astar">
+                        <span class="algo-icon">⭐</span>A*
+                        <span class="algo-tag">Heuristic</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card" id="section-tools">
+                <div class="section-title">Drawing Tool</div>
+                <div class="tool-buttons" id="tool-buttons">
+                    <button class="tool-btn" data-tool="start" id="btn-tool-start">
+                        <span class="dot dot-start"></span>Start
+                    </button>
+                    <button class="tool-btn" data-tool="end" id="btn-tool-end">
+                        <span class="dot dot-end"></span>End
+                    </button>
+                    <button class="tool-btn active" data-tool="wall" id="btn-tool-wall">
+                        <span class="dot dot-wall"></span>Wall
+                    </button>
+                    <button class="tool-btn" data-tool="weight" id="btn-tool-weight">
+                        <span class="dot dot-weight"></span>Weight
+                    </button>
+                    <button class="tool-btn" data-tool="erase" id="btn-tool-erase">
+                        <span class="dot dot-erase"></span>Erase
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card" id="section-settings">
+                <div class="section-title">Grid Size</div>
+                <div class="grid-size-control">
+                    <label>Rows <input type="number" id="input-rows" min="5" max="50" value="20" /></label>
+                    <label>Cols <input type="number" id="input-cols" min="5" max="60" value="35" /></label>
+                </div>
+                <div class="speed-control" style="margin-top: var(--space-5);">
+                    <div class="section-title" style="margin-bottom: 0;">Animation Speed</div>
+                    <div class="speed-label-row">
+                        <span style="font-size: var(--text-xs); color: var(--text-muted);">Slow</span>
+                        <span class="speed-value" id="speed-display">25 ms</span>
+                        <span style="font-size: var(--text-xs); color: var(--text-muted);">Fast</span>
+                    </div>
+                    <input type="range" id="speed-slider" min="5" max="150" value="25" />
+                </div>
+            </div>
+
+            <div class="glass-card" id="section-patterns">
+                <div class="section-title">Maze Patterns</div>
+                <select class="pattern-select" id="pattern-select">
+                    <option value="">— Select a pattern —</option>
+                    <option value="random-walls">Random Walls (30 %)</option>
+                    <option value="recursive-division">Recursive Division</option>
+                    <option value="spiral">Spiral Maze</option>
+                    <option value="staircase">Staircase</option>
+                </select>
+            </div>
+
+            <div class="glass-card" id="section-actions">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="btn-run">▶ Visualize</button>
+                    <button class="btn btn-compare" id="btn-compare">⚡ Compare All</button>
+                    <div class="btn-row">
+                        <button class="btn btn-secondary" id="btn-clear-path">Clear Path</button>
+                        <button class="btn btn-danger" id="btn-reset">Reset All</button>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Grid & stats -->
+        <section class="visualizer-area">
+            <div class="stats-bar" id="stats-bar">
+                <div class="stat-chip">Algorithm <span class="stat-value" id="stat-algo">BFS</span></div>
+                <div class="stat-chip">Explored <span class="stat-value" id="stat-explored">0</span></div>
+                <div class="stat-chip">Path Length <span class="stat-value" id="stat-path">0</span></div>
+                <div class="stat-chip">Time <span class="stat-value" id="stat-time">—</span></div>
+            </div>
+
+            <div class="glass-card grid-container" id="grid-container">
+                <div class="grid" id="grid"></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><span class="legend-swatch swatch-start"></span>Start</div>
+                <div class="legend-item"><span class="legend-swatch swatch-end"></span>End</div>
+                <div class="legend-item"><span class="legend-swatch swatch-wall"></span>Wall</div>
+                <div class="legend-item"><span class="legend-swatch swatch-weight"></span>Weight</div>
+                <div class="legend-item"><span class="legend-swatch swatch-explored"></span>Explored</div>
+                <div class="legend-item"><span class="legend-swatch swatch-path"></span>Path</div>
+            </div>
+        </section>
+
+    </div>
+
+</div>
+
+<!-- Comparison modal -->
+<div class="compare-overlay" id="compare-overlay">
+    <div class="compare-modal">
+        <div class="compare-header">
+            <h2>⚡ Algorithm Comparison</h2>
+            <p>Side-by-side results on the same grid — identical walls, weights, start & end</p>
+            <button class="compare-close-btn" id="compare-close">✕</button>
+        </div>
+        <div class="compare-grid" id="compare-grid"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
